@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -22,11 +23,17 @@ public class UserResource {
 
     @GetMapping("/users/{id}")
     public User retrieveUser(@PathVariable Integer id) {
-        return userDaoService.findOne(id);
+        User user = userDaoService.findOne(id);
+
+        if (user == null) {
+            throw new UserNotFoundException("id-" + id);
+        }
+
+        return user;
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User saved = userDaoService.save(user);
 
         URI location = ServletUriComponentsBuilder
@@ -36,5 +43,14 @@ public class UserResource {
                 .toUri();
 
         return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable Integer id) {
+        User user = userDaoService.deleteById(id);
+
+        if (user == null) {
+            throw new UserNotFoundException("id-" + id);
+        }
     }
 }
