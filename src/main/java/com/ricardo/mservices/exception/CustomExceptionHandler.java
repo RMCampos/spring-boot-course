@@ -17,16 +17,28 @@ import java.util.Date;
 @RestController
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final String MESSAGE_TEMPLATE = "Exception: %s";
+    private static final String DETAILS_TEMPLATE = "%s. %s";
+    private static final String VALIDATION_TEMPLATE = "%s";
+
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(),
+                String.format(MESSAGE_TEMPLATE, "General exception."),
+                String.format(DETAILS_TEMPLATE, ex.getMessage(), request.getDescription(false))
+        );
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public final ResponseEntity<Object> handleUserExceptions(UserNotFoundException ex, WebRequest request) {
-        ExceptionResponse exceptionResponse = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(),
+                String.format(MESSAGE_TEMPLATE, UserNotFoundException.MESSAGE),
+                String.format(DETAILS_TEMPLATE, ex.getMessage(), request.getDescription(false))
+        );
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
@@ -35,8 +47,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new Date(),
-                "Validation failed",
-                ex.getBindingResult().toString()
+                String.format(MESSAGE_TEMPLATE, "Validation failed"),
+                String.format(VALIDATION_TEMPLATE, ex.getBindingResult())
         );
 
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
