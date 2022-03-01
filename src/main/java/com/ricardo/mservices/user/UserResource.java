@@ -18,7 +18,7 @@ public class UserResource {
     @Autowired
     private UserDaoService userDaoService;
 
-    @GetMapping("/users")
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<User> retrieveAllUsers() {
         return userDaoService.findAll();
     }
